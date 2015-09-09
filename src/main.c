@@ -47,14 +47,24 @@ static void appTaskLED2(void *pdata);
 
 typedef enum {
 	LED1 = 0, LED2,
-	JLEFT, JRIGHT
+	JLEFT, JRIGHT,
+	JUP, JDOWN
 } deviceNames_t;
 
+enum {
+	FLASH_MIN_DELAY     = 1,
+	FLASH_INITIAL_DELAY = 500,
+	FLASH_MAX_DELAY     = 1000,
+	FLASH_DELAY_STEP    = 50
+};
+
 bool buttonPressedAndReleased(deviceNames_t button);
+void incDelay(void);
+void decDelay(void);
 
-
-gpioPin_t pin[4];
-bool flashing = false;
+static gpioPin_t pin[6];
+static bool flashing = false;
+static int32_t flashingDelay = FLASH_INITIAL_DELAY;
 
 /*
 *********************************************************************************************************
@@ -69,6 +79,8 @@ int main() {
 	gpioPinInit(&pin[LED2],   0, 13, OUTPUT_PIN);
 	gpioPinInit(&pin[JLEFT],  5, 0,  INPUT_PIN);
 	gpioPinInit(&pin[JRIGHT], 5, 4,  INPUT_PIN);
+	gpioPinInit(&pin[JUP],    5, 2,  INPUT_PIN);
+	gpioPinInit(&pin[JDOWN],  5, 1,  INPUT_PIN);
 
   /* Initialise the OS */
   OSInit();                                                   
@@ -115,6 +127,12 @@ static void appTaskButtons(void *pdata) {
 		else if (buttonPressedAndReleased(JLEFT)) {
 			flashing = false;
 		}
+		else if (flashing && buttonPressedAndReleased(JUP)) {
+			incDelay();
+		}
+		else if (flashing && buttonPressedAndReleased(JDOWN)) {
+			decDelay();
+		}
     OSTimeDlyHMSM(0,0,0,100);
   }
 }
@@ -124,7 +142,7 @@ static void appTaskLED1(void *pdata) {
 		if (flashing) {
       gpioPinToggle(&pin[LED1]);
 		}
-    OSTimeDlyHMSM(0,0,0,500);
+    OSTimeDly(flashingDelay);
   }
 }
 
@@ -134,7 +152,7 @@ static void appTaskLED2(void *pdata) {
 		if (flashing) {
       gpioPinToggle(&pin[LED2]);
 		}
-    OSTimeDlyHMSM(0,0,0,500);
+    OSTimeDly(flashingDelay);
   } 
 }
 
@@ -164,3 +182,21 @@ bool buttonPressedAndReleased(deviceNames_t button) {
 	return result;
 }
 
+void incDelay(void) {
+	if (flashingDelay + FLASH_DELAY_STEP > FLASH_MAX_DELAY) {
+		flashingDelay = FLASH_MAX_DELAY;
+	}
+	else {
+		flashingDelay += FLASH_DELAY_STEP;
+	}
+}
+
+void decDelay(void) {
+	if (flashingDelay - FLASH_DELAY_STEP < FLASH_MIN_DELAY) {
+		flashingDelay = FLASH_MIN_DELAY;
+	}
+	else {
+		flashingDelay -= FLASH_DELAY_STEP;
+	}
+}
+	
