@@ -31,8 +31,8 @@ static OS_STK appTaskLED2Stk[APP_TASK_LED2_STK_SIZE];
 *********************************************************************************************************
 */
 
-static void appTaskLED1Led(void *pdata);
-static void appTaskLED2Led(void *pdata);
+static void appTaskLED1(void *pdata);
+static void appTaskLED2(void *pdata);
 
 /*
 *********************************************************************************************************
@@ -63,12 +63,12 @@ int main() {
   OSInit();                                                   
 
   /* Create the tasks */
-  OSTaskCreate(appTaskLED1Led,                               
+  OSTaskCreate(appTaskLED1,                               
                (void *)0,
                (OS_STK *)&appTaskLED1Stk[APP_TASK_LED1_STK_SIZE - 1],
                APP_TASK_LED1_PRIO);
   
-  OSTaskCreate(appTaskLED2Led,                               
+  OSTaskCreate(appTaskLED2,                               
                (void *)0,
                (OS_STK *)&appTaskLED2Stk[APP_TASK_LED2_STK_SIZE - 1],
                APP_TASK_LED2_PRIO);
@@ -87,7 +87,7 @@ int main() {
 *********************************************************************************************************
 */
 
-static void appTaskLED1Led(void *pdata) {
+static void appTaskLED1(void *pdata) {
   /* Start the OS ticker -- must be done in the highest priority task */
   SysTick_Config(SystemCoreClock / OS_TICKS_PER_SEC);
   
@@ -98,10 +98,10 @@ static void appTaskLED1Led(void *pdata) {
   }
 }
 
-static void appTaskLED2Led(void *pdata) {
+static void appTaskLED2(void *pdata) {
   while (true) {
-    OSTimeDlyHMSM(0,0,0,500);
     gpioPinToggle(&pin[LED2]);
+		OSTimeDlyHMSM(0,0,0,500);
   } 
 }
 
