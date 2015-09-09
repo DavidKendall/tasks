@@ -131,10 +131,10 @@ static void appTaskLED1(void *pdata) {
 
 static void appTaskLED2(void *pdata) {
   while (true) {
-    OSTimeDlyHMSM(0,0,0,500);
 		if (flashing) {
       gpioPinToggle(&pin[LED2]);
 		}
+    OSTimeDlyHMSM(0,0,0,500);
   } 
 }
 
