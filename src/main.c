@@ -48,7 +48,7 @@ static void appTaskLED2(void *pdata);
 typedef enum {
 	LED1 = 0, LED2,
 	JLEFT, JRIGHT,
-	JUP, JDOWN
+	JUP, JDOWN, N_DEVICES
 } deviceNames_t;
 
 enum {
@@ -62,7 +62,7 @@ bool buttonPressedAndReleased(deviceNames_t button);
 void incDelay(void);
 void decDelay(void);
 
-static gpioPin_t pin[6];
+static gpioPin_t pin[N_DEVICES];
 static bool flashing = false;
 static int32_t flashingDelay = FLASH_INITIAL_DELAY;
 
@@ -172,7 +172,7 @@ static void appTaskLED2(void *pdata) {
 bool buttonPressedAndReleased(deviceNames_t button) {
 	bool result = false;
 	uint32_t state;
-	static uint32_t savedState[4] = {1,1,1,1};
+	static uint32_t savedState[N_DEVICES] = {1,1,1,1,1,1}; 
 	
 	state = gpioPinVal(&pin[button]);
   if ((savedState[button] == 0) && (state == 1)) {
